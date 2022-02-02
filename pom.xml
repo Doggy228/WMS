@@ -12,7 +12,7 @@
 	<artifactId>wms</artifactId>
 	<packaging>jar</packaging>
 	<version>0.1.1</version>
-	<name></name>
+	<name>WMS</name>
 	<description>Wallet Management System</description>
 	<properties>
 		<java.version>11</java.version>
@@ -36,15 +36,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-mongodb</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 		<dependency>
