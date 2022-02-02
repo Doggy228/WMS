@@ -1,0 +1,2 @@
+mongod --config /usr/local/etc/mongod.conf
+ps aux | grep -v grep | grep mongod
