@@ -1,12 +1,25 @@
 package edu.doggy228.loyaltyexch.wms;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.doggy228.loyaltyexch.wms.api.v1.ApiException;
+import edu.doggy228.loyaltyexch.wms.service.ApiReq;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.StringTokenizer;
 
 public final class Utils {
+    public static LocalDateTime getDateTimeCur() {
+        return LocalDateTime.now();
+    }
     public static LocalDateTime getDateTimeCurUTC() {
         return LocalDateTime.now(ZoneOffset.UTC);
     }
@@ -154,5 +167,31 @@ public final class Utils {
         if(val2==0) return val1+".00";
         if(val2<10) return val1+".0"+val2;
         return val1+"."+val2;
+    }
+
+    public static HttpEntity<String> createRestRequest(String bearerAuth, String bodyJson){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        if(bearerAuth!=null && !bearerAuth.isEmpty()) headers.setBearerAuth(bearerAuth);
+        if(bodyJson!=null && !bodyJson.isEmpty()) {
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            return new HttpEntity<>(bodyJson, headers);
+        }
+        return new HttpEntity<>(headers);
+    }
+    public static JsonNode getRestResponseRoot(ApiReq apiReq, ResponseEntity<String> response) throws Exception{
+        ObjectMapper mapper = new ObjectMapper();
+        switch(response.getStatusCode()){
+            case OK: case CREATED:
+                if(!response.getHeaders().getContentType().includes(MediaType.APPLICATION_JSON)) throw new ApiException(apiReq, "Помилка запиту до зовнішньої системи", "Response not JSON.",null);
+                return mapper.readTree(response.getBody());
+            default:
+                if(response.getHeaders().getContentType().includes(MediaType.APPLICATION_JSON)){
+                    JsonNode root = mapper.readTree(response.getBody());
+                    throw new ApiException(apiReq, root.path("msg").asText("Помилка запиту до зовнішньої системи"), root.path("detail").asText("HTTP-ERR-"+response.getStatusCodeValue()),null);
+                } else {
+                    throw new ApiException(apiReq, "Помилка запиту до зовнішньої системи", "HTTP-ERR-"+response.getStatusCodeValue(),null);
+                }
+        }
     }
 }

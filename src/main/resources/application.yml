@@ -1,7 +1,9 @@
 app:
-  baseurl: https://localhost:8081/wms
+  baseurl: http://localhost:8083/wms
+  lsemu:
+    baseurl: http://localhost:8082/lsemu/api/v1/lsemu
 server:
-  port: 8081
+  port: 8083
   servlet:
     context-path: /wms
   forward-headers-strategy: framework
@@ -15,7 +17,7 @@ springdoc:
     disable-swagger-default-url: true
 management:
   server:
-    port: 9090
+    port: 9093
   health:
     mongo:
       enabled: true

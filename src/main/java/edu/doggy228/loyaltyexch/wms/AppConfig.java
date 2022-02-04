@@ -12,6 +12,8 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 public class AppConfig {
     @Value("${app.baseurl}")
     private String appBaseurl;
+    @Value("${app.lsemu.baseurl}")
+    private String lsemuBaseurl;
 
     @Bean
     public MessageSource messageSource() {

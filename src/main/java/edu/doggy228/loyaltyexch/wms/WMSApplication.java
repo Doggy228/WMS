@@ -29,13 +29,13 @@ public class WMSApplication {
 						.license(new License().name("Apache 2.0").url("http://springdoc.org")))
 				.components(new Components()
 						.addSecuritySchemes("bearer-key",
-								new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT").description("User access token.")));
+								new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT").description("Токен доступу. ad:_ - адміністратор, wu:tel - гаманець, ls:id - лояльність")));
 	}
 
 	@Bean
 	public GroupedOpenApi walletOpenApi() {
 		return GroupedOpenApi.builder()
-				.group("Wallet API")
+				.group("1. Wallet API")
 				.packagesToScan("edu.doggy228.loyaltyexch.wms.api.v1.wallet")
 				.build();
 	}
@@ -43,7 +43,7 @@ public class WMSApplication {
 	@Bean
 	public GroupedOpenApi adminOpenApi() {
 		return GroupedOpenApi.builder()
-				.group("Administration API")
+				.group("2. Administration API")
 				.packagesToScan("edu.doggy228.loyaltyexch.wms.api.v1.admin")
 				.build();
 	}
@@ -51,7 +51,7 @@ public class WMSApplication {
 	@Bean
 	public GroupedOpenApi loyaltyOpenApi() {
 		return GroupedOpenApi.builder()
-				.group("Loyalty Management API")
+				.group("3. Loyalty Management API")
 				.packagesToScan("edu.doggy228.loyaltyexch.wms.api.v1.loyalty")
 				.build();
 	}
