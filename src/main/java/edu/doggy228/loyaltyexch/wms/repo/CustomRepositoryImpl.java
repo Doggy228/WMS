@@ -30,6 +30,18 @@ public class CustomRepositoryImpl implements CustomRepository {
     }
 
     @Override
+    public LoyaltyUser loyaltyUserFindByWalletUserAndLoyaltySystem(String walletUserId, String loyaltySystemId){
+        final Query query = new Query()
+                .addCriteria(new Criteria().andOperator(
+                        Criteria.where("walletUserId").is(walletUserId),
+                        Criteria.where("loyaltySystemId").is(loyaltySystemId)
+                        ));
+        List<LoyaltyUser> list = mongoTemplate.find(query, LoyaltyUser.class);
+        if(list==null || list.isEmpty()) return null;
+        return list.get(0);
+    }
+
+    @Override
     public List<Oper> operFindByWalletUserLast100(String walletUserId) {
         final Pageable pageableRequest = PageRequest.of(0, 100);
         final Query query = new Query()

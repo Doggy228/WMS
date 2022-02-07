@@ -3,6 +3,7 @@ package edu.doggy228.loyaltyexch.wms;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.doggy228.loyaltyexch.wms.api.v1.ApiException;
+import edu.doggy228.loyaltyexch.wms.modeljson.AttrValue;
 import edu.doggy228.loyaltyexch.wms.service.ApiReq;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,13 +14,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public final class Utils {
     public static LocalDateTime getDateTimeCur() {
         return LocalDateTime.now();
     }
+
     public static LocalDateTime getDateTimeCurUTC() {
         return LocalDateTime.now(ZoneOffset.UTC);
     }
@@ -135,8 +139,8 @@ public final class Utils {
     }
 
     public static String maskBankCardNum(String s) {
-        if (s == null || s.isEmpty() || s.length()!=16) return s;
-        return s.substring(0,4)+" "+s.substring(4,6)+"XX XXXX "+s.substring(12,16);
+        if (s == null || s.isEmpty() || s.length() != 16) return s;
+        return s.substring(0, 4) + " " + s.substring(4, 6) + "XX XXXX " + s.substring(12, 16);
     }
 
 
@@ -161,37 +165,75 @@ public final class Utils {
     }
 
     public static String toCurrencyValueStr(long value, boolean flnull) {
-        if(value==0) return flnull?null:"0.00";
-        long val1 = value/100L;
-        long val2 = Math.abs(value%100L);
-        if(val2==0) return val1+".00";
-        if(val2<10) return val1+".0"+val2;
-        return val1+"."+val2;
+        if (value == 0) return flnull ? null : "0.00";
+        long val1 = value / 100L;
+        long val2 = Math.abs(value % 100L);
+        if (val2 == 0) return val1 + ".00";
+        if (val2 < 10) return val1 + ".0" + val2;
+        return val1 + "." + val2;
     }
 
-    public static HttpEntity<String> createRestRequest(String bearerAuth, String bodyJson){
+    public static HttpEntity<String> createRestRequest(String bearerAuth, String bodyJson) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        if(bearerAuth!=null && !bearerAuth.isEmpty()) headers.setBearerAuth(bearerAuth);
-        if(bodyJson!=null && !bodyJson.isEmpty()) {
+        if (bearerAuth != null && !bearerAuth.isEmpty()) headers.setBearerAuth(bearerAuth);
+        if (bodyJson != null && !bodyJson.isEmpty()) {
             headers.setContentType(MediaType.APPLICATION_JSON);
             return new HttpEntity<>(bodyJson, headers);
         }
         return new HttpEntity<>(headers);
     }
-    public static JsonNode getRestResponseRoot(ApiReq apiReq, ResponseEntity<String> response) throws Exception{
+
+    public static JsonNode getRestResponseRoot(ApiReq apiReq, ResponseEntity<String> response) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        switch(response.getStatusCode()){
-            case OK: case CREATED:
-                if(!response.getHeaders().getContentType().includes(MediaType.APPLICATION_JSON)) throw new ApiException(apiReq, "Помилка запиту до зовнішньої системи", "Response not JSON.",null);
+        switch (response.getStatusCode()) {
+            case OK:
+            case CREATED:
+                if (!response.getHeaders().getContentType().includes(MediaType.APPLICATION_JSON))
+                    throw new ApiException(apiReq, "Помилка запиту до зовнішньої системи", "Response not JSON.", null);
                 return mapper.readTree(response.getBody());
             default:
-                if(response.getHeaders().getContentType().includes(MediaType.APPLICATION_JSON)){
+                if (response.getHeaders().getContentType().includes(MediaType.APPLICATION_JSON)) {
                     JsonNode root = mapper.readTree(response.getBody());
-                    throw new ApiException(apiReq, root.path("msg").asText("Помилка запиту до зовнішньої системи"), root.path("detail").asText("HTTP-ERR-"+response.getStatusCodeValue()),null);
+                    throw new ApiException(apiReq, root.path("msg").asText("Помилка запиту до зовнішньої системи"), root.path("detail").asText("HTTP-ERR-" + response.getStatusCodeValue()), null);
                 } else {
-                    throw new ApiException(apiReq, "Помилка запиту до зовнішньої системи", "HTTP-ERR-"+response.getStatusCodeValue(),null);
+                    throw new ApiException(apiReq, "Помилка запиту до зовнішньої системи", "HTTP-ERR-" + response.getStatusCodeValue(), null);
                 }
         }
     }
+
+    public static List<AttrValue> attrValueToList(AttrValue[] arr) {
+        List<AttrValue> list = new ArrayList<>();
+        if (arr != null && arr.length > 0) {
+            for (int i = 0; i < arr.length; i++) {
+                list.add(arr[i]);
+            }
+        }
+        return list;
+    }
+
+    public static String attrValueGet(AttrValue[] arr, String id, String defvalue) {
+        if (arr == null || arr.length == 0) return defvalue;
+        for (AttrValue el : arr) {
+            if (el.getId().equals(id)) return el.getV();
+        }
+        return defvalue;
+    }
+
+    public static void attrValueSet(List<AttrValue> list, String id, String value) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().equals(id)) {
+                if (value == null) {
+                    list.remove(i);
+                } else {
+                    list.get(i).setV(value);
+                }
+                return;
+            }
+        }
+        if (value != null) {
+            list.add(new AttrValue(id, value));
+        }
+    }
+
 }

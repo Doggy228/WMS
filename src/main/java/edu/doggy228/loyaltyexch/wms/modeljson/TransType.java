@@ -8,5 +8,7 @@ public enum TransType {
     @JsonProperty("scSell")
     SC_SELL,
     @JsonProperty("lsPay")
-    LS_PAY
+    LS_PAY,
+    @JsonProperty("lsExch")
+    LS_EXCH
 }
